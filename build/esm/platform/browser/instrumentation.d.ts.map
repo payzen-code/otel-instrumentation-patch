@@ -1,0 +1,1 @@
+{"version":3,"file":"instrumentation.d.ts","sourceRoot":"","sources":["../../../../src/platform/browser/instrumentation.ts"],"names":[],"mappings":"AAgBA,OAAO,EAAE,uBAAuB,EAAE,MAAM,uBAAuB,CAAC;AAChE,OAAO,KAAK,KAAK,MAAM,aAAa,CAAC;AAErC;;GAEG;AACH,8BAAsB,mBACpB,SAAQ,uBACR,YAAW,KAAK,CAAC,eAAe;gBAE9B,mBAAmB,EAAE,MAAM,EAC3B,sBAAsB,EAAE,MAAM,EAC9B,MAAM,GAAE,KAAK,CAAC,qBAA0B;CAQ3C"}
