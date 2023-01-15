@@ -36,6 +36,7 @@ export class InstrumentationAbstract {
         });
         this._tracer = trace.getTracer(instrumentationName, instrumentationVersion);
         this._meter = metrics.getMeter(instrumentationName, instrumentationVersion);
+        this._updateMetricInstruments();
     }
     /* Returns meter */
     get meter() {
@@ -47,6 +48,13 @@ export class InstrumentationAbstract {
      */
     setMeterProvider(meterProvider) {
         this._meter = meterProvider.getMeter(this.instrumentationName, this.instrumentationVersion);
+        this._updateMetricInstruments();
+    }
+    /**
+     * Sets the new metric instruments with the current Meter.
+     */
+    _updateMetricInstruments() {
+        return;
     }
     /* Returns InstrumentationConfig */
     getConfig() {

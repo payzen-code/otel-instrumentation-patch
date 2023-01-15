@@ -21,6 +21,7 @@ const semver_1 = require("semver");
 const instrumentation_1 = require("../../instrumentation");
 const RequireInTheMiddleSingleton_1 = require("./RequireInTheMiddleSingleton");
 const api_1 = require("@opentelemetry/api");
+const RequireInTheMiddle = require("require-in-the-middle");
 /**
  * Base abstract class for instrumenting node plugins
  */
@@ -129,9 +130,15 @@ class InstrumentationBase extends instrumentation_1.InstrumentationAbstract {
         }
         this._warnOnPreloadedModules();
         for (const module of this._modules) {
-            this._hooks.push(this._requireInTheMiddleSingleton.register(module.name, (exports, name, baseDir) => {
+            const onRequire = (exports, name, baseDir) => {
                 return this._onRequire(module, exports, name, baseDir);
-            }));
+            };
+            // `RequireInTheMiddleSingleton` does not support absolute paths.
+            // For an absolute paths, we must create a separate instance of `RequireInTheMiddle`.
+            const hook = path.isAbsolute(module.name)
+                ? RequireInTheMiddle([module.name], { internals: true }, onRequire)
+                : this._requireInTheMiddleSingleton.register(module.name, onRequire);
+            this._hooks.push(hook);
         }
     }
     disable() {

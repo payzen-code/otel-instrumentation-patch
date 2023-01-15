@@ -101,21 +101,26 @@ var ModuleNameTrie = /** @class */ (function () {
      *
      * @param {string} moduleName Module name
      * @param {boolean} maintainInsertionOrder Whether to return the results in insertion order
+     * @param {boolean} fullOnly Whether to return only full matches
      * @returns {Hooked[]} Matching hooks
      */
     ModuleNameTrie.prototype.search = function (moduleName, _a) {
         var e_2, _b;
-        var _c = _a === void 0 ? {} : _a, maintainInsertionOrder = _c.maintainInsertionOrder;
+        var _c = _a === void 0 ? {} : _a, maintainInsertionOrder = _c.maintainInsertionOrder, fullOnly = _c.fullOnly;
         var trieNode = this._trie;
         var results = [];
+        var foundFull = true;
         try {
             for (var _d = __values(moduleName.split(ModuleNameSeparator)), _e = _d.next(); !_e.done; _e = _d.next()) {
                 var moduleNamePart = _e.value;
                 var nextNode = trieNode.children.get(moduleNamePart);
                 if (!nextNode) {
+                    foundFull = false;
                     break;
                 }
-                results.push.apply(results, __spreadArray([], __read(nextNode.hooks), false));
+                if (!fullOnly) {
+                    results.push.apply(results, __spreadArray([], __read(nextNode.hooks), false));
+                }
                 trieNode = nextNode;
             }
         }
@@ -125,6 +130,9 @@ var ModuleNameTrie = /** @class */ (function () {
                 if (_e && !_e.done && (_b = _d.return)) _b.call(_d);
             }
             finally { if (e_2) throw e_2.error; }
+        }
+        if (fullOnly && foundFull) {
+            results.push.apply(results, __spreadArray([], __read(trieNode.hooks), false));
         }
         if (results.length === 0) {
             return [];

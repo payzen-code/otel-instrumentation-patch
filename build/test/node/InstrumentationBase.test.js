@@ -17,6 +17,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const assert = require("assert");
 const sinon = require("sinon");
+const path = require("path");
 const src_1 = require("../../src");
 const MODULE_NAME = 'test-module';
 const MODULE_FILE_NAME = 'test-module-file';
@@ -125,11 +126,13 @@ describe('InstrumentationBase', () => {
                         supportedVersions,
                         name: MODULE_NAME,
                         patch: modulePatchSpy,
-                        files: [{
+                        files: [
+                            {
                                 name: MODULE_FILE_NAME,
                                 supportedVersions,
-                                patch: filePatchSpy
-                            }]
+                                patch: filePatchSpy,
+                            },
+                        ],
                     };
                     // @ts-expect-error access internal property for testing
                     instrumentation._onRequire(instrumentationModule, moduleExports, MODULE_FILE_NAME, MODULE_DIR);
@@ -147,11 +150,13 @@ describe('InstrumentationBase', () => {
                         supportedVersions,
                         name: MODULE_NAME,
                         patch: modulePatchSpy,
-                        files: [{
+                        files: [
+                            {
                                 name: MODULE_FILE_NAME,
                                 supportedVersions,
-                                patch: filePatchSpy
-                            }]
+                                patch: filePatchSpy,
+                            },
+                        ],
                     };
                     // @ts-expect-error access internal property for testing
                     instrumentation._onRequire(instrumentationModule, moduleExports, MODULE_FILE_NAME, MODULE_DIR);
@@ -169,15 +174,18 @@ describe('InstrumentationBase', () => {
                         supportedVersions,
                         name: MODULE_NAME,
                         patch: modulePatchSpy,
-                        files: [{
+                        files: [
+                            {
                                 name: MODULE_FILE_NAME,
                                 supportedVersions,
-                                patch: filePatchSpy
-                            }, {
+                                patch: filePatchSpy,
+                            },
+                            {
                                 name: MODULE_FILE_NAME,
                                 supportedVersions,
-                                patch: filePatchSpy
-                            }]
+                                patch: filePatchSpy,
+                            },
+                        ],
                     };
                     // @ts-expect-error access internal property for testing
                     instrumentation._onRequire(instrumentationModule, moduleExports, MODULE_FILE_NAME, MODULE_DIR);
@@ -187,6 +195,74 @@ describe('InstrumentationBase', () => {
                     sinon.assert.notCalled(modulePatchSpy);
                     sinon.assert.calledTwice(filePatchSpy);
                 });
+            });
+        });
+    });
+    describe('enable/disable', () => {
+        describe('AND a normal module name', () => {
+            const moduleName = 'net';
+            class TestInstrumentation extends src_1.InstrumentationBase {
+                constructor() {
+                    super('@opentelemetry/instrumentation-net-test', '0.0.0', {
+                        enabled: false,
+                    });
+                }
+                init() {
+                    return [
+                        new src_1.InstrumentationNodeModuleDefinition(moduleName, ['*'], (exports) => {
+                            exports.__patched = true;
+                            return exports;
+                        }, (exports) => {
+                            exports.__patched = false;
+                            return exports;
+                        }),
+                    ];
+                }
+            }
+            const instrumentation = new TestInstrumentation();
+            it('should patch the module', () => {
+                instrumentation.enable();
+                const exportsPatched = require(moduleName);
+                assert.equal(exportsPatched.__patched, true, 'after enable');
+                instrumentation.disable();
+                assert.equal(exportsPatched.__patched, false, 'after disable');
+                instrumentation.enable();
+                assert.equal(exportsPatched.__patched, true, 'after re-enable');
+            });
+        });
+        describe('AND an absolute path module name', () => {
+            const moduleName = 'absolutePathTestFixture';
+            const fileName = path.join(__dirname, 'fixtures', `${moduleName}.js`);
+            class TestInstrumentation extends src_1.InstrumentationBase {
+                constructor() {
+                    super('@opentelemetry/instrumentation-absolute-path-test', '0.0.0', {
+                        enabled: false,
+                    });
+                }
+                init() {
+                    return [
+                        new src_1.InstrumentationNodeModuleDefinition(fileName, ['*'], undefined, undefined, [
+                            new src_1.InstrumentationNodeModuleFile(moduleName, ['*'], (exports) => {
+                                exports.__patched = true;
+                                return exports;
+                            }, (exports) => {
+                                if (exports)
+                                    exports.__patched = false;
+                                return exports;
+                            }),
+                        ]),
+                    ];
+                }
+            }
+            const instrumentation = new TestInstrumentation();
+            it('should patch the module', () => {
+                instrumentation.enable();
+                const exportsPatched = require(fileName);
+                assert.equal(exportsPatched.__patched, true, 'after enable');
+                instrumentation.disable();
+                assert.equal(exportsPatched.__patched, false, 'after disable');
+                instrumentation.enable();
+                assert.equal(exportsPatched.__patched, true, 'after re-enable');
             });
         });
     });

@@ -39,6 +39,7 @@ class InstrumentationAbstract {
         });
         this._tracer = api_1.trace.getTracer(instrumentationName, instrumentationVersion);
         this._meter = api_1.metrics.getMeter(instrumentationName, instrumentationVersion);
+        this._updateMetricInstruments();
     }
     /* Returns meter */
     get meter() {
@@ -50,6 +51,13 @@ class InstrumentationAbstract {
      */
     setMeterProvider(meterProvider) {
         this._meter = meterProvider.getMeter(this.instrumentationName, this.instrumentationVersion);
+        this._updateMetricInstruments();
+    }
+    /**
+     * Sets the new metric instruments with the current Meter.
+     */
+    _updateMetricInstruments() {
+        return;
     }
     /* Returns InstrumentationConfig */
     getConfig() {

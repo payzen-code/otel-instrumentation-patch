@@ -16,8 +16,9 @@
 import * as path from 'path';
 import { satisfies } from 'semver';
 import { InstrumentationAbstract } from '../../instrumentation';
-import { RequireInTheMiddleSingleton } from './RequireInTheMiddleSingleton';
+import { RequireInTheMiddleSingleton, } from './RequireInTheMiddleSingleton';
 import { diag } from '@opentelemetry/api';
+import * as RequireInTheMiddle from 'require-in-the-middle';
 /**
  * Base abstract class for instrumenting node plugins
  */
@@ -126,9 +127,15 @@ export class InstrumentationBase extends InstrumentationAbstract {
         }
         this._warnOnPreloadedModules();
         for (const module of this._modules) {
-            this._hooks.push(this._requireInTheMiddleSingleton.register(module.name, (exports, name, baseDir) => {
+            const onRequire = (exports, name, baseDir) => {
                 return this._onRequire(module, exports, name, baseDir);
-            }));
+            };
+            // `RequireInTheMiddleSingleton` does not support absolute paths.
+            // For an absolute paths, we must create a separate instance of `RequireInTheMiddle`.
+            const hook = path.isAbsolute(module.name)
+                ? RequireInTheMiddle([module.name], { internals: true }, onRequire)
+                : this._requireInTheMiddleSingleton.register(module.name, onRequire);
+            this._hooks.push(hook);
         }
     }
     disable() {

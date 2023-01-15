@@ -22,6 +22,10 @@ export declare abstract class InstrumentationAbstract<T = any> implements types.
      * @param meterProvider
      */
     setMeterProvider(meterProvider: MeterProvider): void;
+    /**
+     * Sets the new metric instruments with the current Meter.
+     */
+    protected _updateMetricInstruments(): void;
     getConfig(): types.InstrumentationConfig;
     /**
      * Sets InstrumentationConfig to this plugin

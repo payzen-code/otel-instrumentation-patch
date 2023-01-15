@@ -17,6 +17,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const assert = require("assert");
 const src_1 = require("../../src");
+const sdk_metrics_1 = require("@opentelemetry/sdk-metrics");
 class TestInstrumentation extends src_1.InstrumentationBase {
     constructor(config = {}) {
         super('test', '1.0.0', Object.assign({}, config));
@@ -41,13 +42,35 @@ describe('BaseInstrumentation', () => {
     });
     describe('constructor', () => {
         it('should enable instrumentation by default', () => {
-            let called = false;
+            let enableCalled = false;
+            let updateMetricInstrumentsCalled = false;
             class TestInstrumentation2 extends TestInstrumentation {
                 enable() {
+                    enableCalled = true;
+                }
+                _updateMetricInstruments() {
+                    updateMetricInstrumentsCalled = true;
+                }
+            }
+            instrumentation = new TestInstrumentation2();
+            assert.strictEqual(enableCalled, true);
+            assert.strictEqual(updateMetricInstrumentsCalled, true);
+        });
+    });
+    describe('setMeterProvider', () => {
+        let otelTestingMeterProvider;
+        beforeEach(() => {
+            otelTestingMeterProvider = new sdk_metrics_1.MeterProvider();
+        });
+        it('should call _updateMetricInstruments', () => {
+            let called = true;
+            class TestInstrumentation2 extends TestInstrumentation {
+                _updateMetricInstruments() {
                     called = true;
                 }
             }
             instrumentation = new TestInstrumentation2();
+            instrumentation.setMeterProvider(otelTestingMeterProvider);
             assert.strictEqual(called, true);
         });
     });

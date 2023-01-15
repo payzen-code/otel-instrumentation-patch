@@ -48,6 +48,7 @@ var InstrumentationAbstract = /** @class */ (function () {
         });
         this._tracer = trace.getTracer(instrumentationName, instrumentationVersion);
         this._meter = metrics.getMeter(instrumentationName, instrumentationVersion);
+        this._updateMetricInstruments();
     }
     Object.defineProperty(InstrumentationAbstract.prototype, "meter", {
         /* Returns meter */
@@ -63,6 +64,13 @@ var InstrumentationAbstract = /** @class */ (function () {
      */
     InstrumentationAbstract.prototype.setMeterProvider = function (meterProvider) {
         this._meter = meterProvider.getMeter(this.instrumentationName, this.instrumentationVersion);
+        this._updateMetricInstruments();
+    };
+    /**
+     * Sets the new metric instruments with the current Meter.
+     */
+    InstrumentationAbstract.prototype._updateMetricInstruments = function () {
+        return;
     };
     /* Returns InstrumentationConfig */
     InstrumentationAbstract.prototype.getConfig = function () {

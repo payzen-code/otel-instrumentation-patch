@@ -39,7 +39,14 @@ var ESMHook = ImportInTheMiddle;
  *
  * @type {boolean}
  */
-var isMocha = ['afterEach', 'after', 'beforeEach', 'before', 'describe', 'it'].every(function (fn) {
+var isMocha = [
+    'afterEach',
+    'after',
+    'beforeEach',
+    'before',
+    'describe',
+    'it',
+].every(function (fn) {
     // @ts-expect-error TS7053: Element implicitly has an 'any' type
     return typeof global[fn] === 'function';
 });
@@ -63,7 +70,13 @@ var RequireInTheMiddleSingleton = /** @class */ (function () {
             var e_1, _a;
             // For internal files on Windows, `name` will use backslash as the path separator
             var normalizedModuleName = normalizePathSeparators(name);
-            var matches = _this._moduleNameTrie.search(normalizedModuleName, { maintainInsertionOrder: true });
+            var matches = _this._moduleNameTrie.search(normalizedModuleName, {
+                maintainInsertionOrder: true,
+                // For core modules (e.g. `fs`), do not match on sub-paths (e.g. `fs/promises').
+                // This matches the behavior of `require-in-the-middle`.
+                // `basedir` is always `undefined` for core modules.
+                fullOnly: basedir === undefined,
+            });
             try {
                 for (var matches_1 = __values(matches), matches_1_1 = matches_1.next(); !matches_1_1.done; matches_1_1 = matches_1.next()) {
                     var onRequire = matches_1_1.value.onRequire;
@@ -107,7 +120,8 @@ var RequireInTheMiddleSingleton = /** @class */ (function () {
         // This prevents test suites from sharing a singleton
         if (isMocha)
             return new RequireInTheMiddleSingleton();
-        return this._instance = (_a = this._instance) !== null && _a !== void 0 ? _a : new RequireInTheMiddleSingleton();
+        return (this._instance =
+            (_a = this._instance) !== null && _a !== void 0 ? _a : new RequireInTheMiddleSingleton());
     };
     return RequireInTheMiddleSingleton;
 }());

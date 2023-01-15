@@ -42,8 +42,9 @@ var __values = (this && this.__values) || function(o) {
 import * as path from 'path';
 import { satisfies } from 'semver';
 import { InstrumentationAbstract } from '../../instrumentation';
-import { RequireInTheMiddleSingleton } from './RequireInTheMiddleSingleton';
+import { RequireInTheMiddleSingleton, } from './RequireInTheMiddleSingleton';
 import { diag } from '@opentelemetry/api';
+import * as RequireInTheMiddle from 'require-in-the-middle';
 /**
  * Base abstract class for instrumenting node plugins
  */
@@ -127,7 +128,9 @@ var InstrumentationBase = /** @class */ (function (_super) {
         var files = (_a = module.files) !== null && _a !== void 0 ? _a : [];
         var supportedFileInstrumentations = files
             .filter(function (f) { return f.name === name; })
-            .filter(function (f) { return isSupported(f.supportedVersions, version, module.includePrerelease); });
+            .filter(function (f) {
+            return isSupported(f.supportedVersions, version, module.includePrerelease);
+        });
         return supportedFileInstrumentations.reduce(function (patchedExports, file) {
             file.moduleExports = patchedExports;
             if (_this._enabled) {
@@ -179,9 +182,15 @@ var InstrumentationBase = /** @class */ (function (_super) {
         }
         this._warnOnPreloadedModules();
         var _loop_1 = function (module_2) {
-            this_1._hooks.push(this_1._requireInTheMiddleSingleton.register(module_2.name, function (exports, name, baseDir) {
+            var onRequire = function (exports, name, baseDir) {
                 return _this._onRequire(module_2, exports, name, baseDir);
-            }));
+            };
+            // `RequireInTheMiddleSingleton` does not support absolute paths.
+            // For an absolute paths, we must create a separate instance of `RequireInTheMiddle`.
+            var hook = path.isAbsolute(module_2.name)
+                ? RequireInTheMiddle([module_2.name], { internals: true }, onRequire)
+                : this_1._requireInTheMiddleSingleton.register(module_2.name, onRequire);
+            this_1._hooks.push(hook);
         };
         var this_1 = this;
         try {
