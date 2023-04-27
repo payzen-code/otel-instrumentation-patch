@@ -48,7 +48,7 @@
     "tdd:node": "npm run test -- --watch-extensions ts --watch",
     "tdd:browser": "karma start",
     "test:cjs": "nyc ts-mocha -p tsconfig.json 'test/**/*.test.ts' --exclude 'test/browser/**/*.ts'",
-    "test:esm": "nyc node --experimental-loader=@payzen/import-in-the-middle/hook.mjs ../../../node_modules/mocha/bin/mocha 'test/node/*.test.mjs' test/node/*.test.mjs",
+    "test:esm": "nyc node --experimental-loader=import-in-the-middle/hook.mjs ../../../node_modules/mocha/bin/mocha 'test/node/*.test.mjs' test/node/*.test.mjs",
     "test": "npm run test:cjs && npm run test:esm",
     "test:browser": "nyc karma start --single-run",
     "version": "node ../../../scripts/version-update.js",
@@ -70,7 +70,7 @@
     "url": "https://github.com/open-telemetry/opentelemetry-js/issues"
   },
   "dependencies": {
-    "@payzen/import-in-the-middle": "^1.3.5",
+    "import-in-the-middle": "github:payzen-code/import-in-the-middle#9c2fa3300787586da96b5ddb214a8f8c98345f12",
     "require-in-the-middle": "^5.0.3",
     "semver": "^7.3.2",
     "shimmer": "^1.2.1"
