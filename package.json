@@ -70,7 +70,7 @@
     "url": "https://github.com/open-telemetry/opentelemetry-js/issues"
   },
   "dependencies": {
-    "import-in-the-middle": "github:payzen-code/import-in-the-middle#9c2fa3300787586da96b5ddb214a8f8c98345f12",
+    "import-in-the-middle": "github:payzen-code/import-in-the-middle#8a032a45a06cded5c05a35e860d2bec86be9075f",
     "require-in-the-middle": "^5.0.3",
     "semver": "^7.3.2",
     "shimmer": "^1.2.1"
